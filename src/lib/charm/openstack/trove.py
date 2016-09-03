@@ -182,7 +182,7 @@ def nova_domain_id(config):
     """
     domain = hookenv.config('nova-domain')
     if domain:
-        return DesignateCharm.get_domain_id(domain)
+        return TroveCharm.get_domain_id(domain)
     return None
 
 
@@ -195,7 +195,7 @@ def neutron_domain_id(config):
     """
     domain = hookenv.config('neutron-domain')
     if domain:
-        return DesignateCharm.get_domain_id(domain)
+        return TroveCharm.get_domain_id(domain)
     return None
 
 
@@ -232,43 +232,37 @@ def rndc_master_ip(config):
     return os_ip.resolve_address(endpoint_type=os_ip.INTERNAL)
 
 
-class DesignateCharm(openstack_charm.HAOpenStackCharm):
-    """Designate charm"""
+class TroveCharm(openstack_charm.HAOpenStackCharm):
 
-    name = 'designate'
-    packages = ['designate-agent', 'designate-api', 'designate-central',
-                'designate-common', 'designate-mdns',
-                'designate-pool-manager', 'designate-sink',
-                'designate-zone-manager', 'bind9utils', 'python-apt']
+    name = 'trove'
+    packages = [ 'build-essential', 'libxslt1-dev', 'qemu-utils',
+                'mysql-client', 'git', 'python-dev', 'python-pexpect',
+                'python-pymysql', 'libmysqlclient-dev', 'python-apt',
+                'python-trove', 'python-troveclient', 'python-glanceclient',
+                'trove-common', 'trove-api', 'trove-taskmanager','trove-conductor']
 
-    services = ['designate-mdns', 'designate-zone-manager',
-                'designate-agent', 'designate-pool-manager',
-                'designate-central', 'designate-sink',
-                'designate-api']
+    services = ['trove-api', 'trove-taskmanager','trove-conductor']
 
     api_ports = {
-        'designate-api': {
-            os_ip.PUBLIC: 9001,
-            os_ip.ADMIN: 9001,
-            os_ip.INTERNAL: 9001,
+        'trove-api': {
+            os_ip.PUBLIC: 8779,
+            os_ip.ADMIN: 8779,
+            os_ip.INTERNAL: 8779,
         }
     }
 
-    required_relations = ['shared-db', 'amqp', 'identity-service',
-                          'dns-backend']
+    required_relations = ['shared-db', 'amqp', 'identity-service', 'image-service', 'cloud-compute', ]
 
     restart_map = {
         '/etc/default/openstack': services,
-        '/etc/designate/designate.conf': services,
-        '/etc/designate/rndc.key': services,
-        '/etc/designate/conf.d/nova_sink.cfg': services,
-        '/etc/designate/conf.d/neutron_sink.cfg': services,
-        '/etc/designate/pools.yaml': [''],
+        '/etc/trove/trove.conf': services,
+        '/etc/trove/trove-conductor.conf': services,
+        '/etc/trove/trove-taskmanager.conf': services,
         RC_FILE: [''],
     }
-    service_type = 'designate'
-    default_service = 'designate-api'
-    sync_cmd = ['designate-manage', 'database', 'sync']
+    service_type = 'trove'
+    default_service = 'trove-api'
+    sync_cmd = ['trove-manage', 'db_sync']
 
     ha_resources = ['vips', 'haproxy']
     release = 'mitaka'
@@ -278,7 +272,7 @@ class DesignateCharm(openstack_charm.HAOpenStackCharm):
 
         :returns (username, host): two strings to send to the amqp provider.
         """
-        return ('designate', 'openstack')
+        return ('trove', 'openstack')
 
     def get_database_setup(self):
         """Provide the default database credentials as a list of 3-tuples
@@ -296,23 +290,18 @@ class DesignateCharm(openstack_charm.HAOpenStackCharm):
         ip = hookenv.unit_private_ip()
         return [
             dict(
-                database='designate',
-                username='designate',
+                database='trove',
+                username='trove',
                 hostname=ip,
-                prefix='designate'),
-            dict(
-                database='dpm',
-                username='dpm',
-                prefix='dpm',
-                hostname=ip)
+                prefix='trove'),
         ]
 
     def render_base_config(self, interfaces_list):
-        """Render initial config to bootstrap Designate service
+        """Render initial config to bootstrap Trove service
 
         @returns None
         """
-        configs = [RC_FILE, DESIGNATE_CONF, RNDC_KEY_CONF, DESIGNATE_DEFAULT]
+        configs = [RC_FILE, TROVE_CONF, TROVE_DEFAULT]
         if self.haproxy_enabled():
             configs.append(self.HAPROXY_CONF)
         self.render_with_interfaces(
@@ -320,59 +309,15 @@ class DesignateCharm(openstack_charm.HAOpenStackCharm):
             configs=configs)
 
     def render_full_config(self, interfaces_list):
-        """Render all config for Designate service
+        """Render all config for Trove service
 
         @returns None
         """
-        # Render base config first to ensure Designate API is responding as
+        # Render base config first to ensure Trove API is responding as
         # sink configs rely on it.
         self.render_base_config(interfaces_list)
         self.render_with_interfaces(interfaces_list)
-
-    def write_key_file(self, unit_name, key):
-        """Write rndc keyfile for given unit_name
-
-        @param unit_name: str Name of unit using key
-        @param key: str RNDC key
-        @returns None
-        """
-        key_file = '/etc/designate/rndc_{}.key'.format(unit_name)
-        template = ('key "rndc-key" {{\n    algorithm hmac-md5;\n    '
-                    'secret "{}";\n}};')
-        host.write_file(
-            key_file,
-            str.encode(template.format(key)),
-            owner='root',
-            group='designate',
-            perms=0o440)
-
-    def render_rndc_keys(self):
-        """Render the rndc keys supplied via user config
-
-        @returns None
-        """
-        slaves = hookenv.config('dns-slaves') or ''
-        for entry in slaves.split():
-            address, port, key = entry.split(':')
-            unit_name = address.replace('.', '_')
-            self.write_key_file(unit_name, key)
-
-    @classmethod
-    def get_domain_id(cls, domain):
-        """Return the domain ID for a given domain name
-
-        @param domain: Domain name
-        @returns domain_id
-        """
-        if domain:
-            cls.ensure_api_responding()
-            get_cmd = ['reactive/designate_utils.py', 'domain-get',
-                       '--domain-name', domain]
-            output = subprocess.check_output(get_cmd)
-            if output:
-                return output.decode('utf8').strip()
-        return None
-
+    '''
     @classmethod
     def create_domain(cls, domain, email):
         """Create a domain
@@ -387,6 +332,7 @@ class DesignateCharm(openstack_charm.HAOpenStackCharm):
         create_cmd = ['reactive/designate_utils.py', 'domain-create',
                       '--domain-name', domain, '--email', email]
         subprocess.check_call(create_cmd)
+    '''
 
     @classmethod
     def create_server(cls, nsname):
