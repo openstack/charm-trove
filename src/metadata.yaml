@@ -1,0 +1,27 @@
+name: trove
+summary: trove provides DBaaS services for OpenStack
+maintainer: TransCirrus <support@transcirrus.com>
+description: |
+ Designate provides DBaaS services for OpenStack:
+ * REST API for domain/record management
+ * Multi-tenant
+ * Integrated with Keystone for authentication
+ * Framework in place to integrate with Nova and Neutron notifications
+ * Support for Percona and PostgreQL out of the box
+tags:
+  - openstack
+  - database
+series:
+ - trusty
+ - xenial
+subordinate: false
+provides:
+  dbaas:
+    interface: trove
+requires:
+  ha:
+    interface: hacluster
+    scope: container
+peers:
+  cluster:
+    interface: openstack-ha
