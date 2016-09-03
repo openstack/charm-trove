@@ -1,4 +1,4 @@
-# Copyright 2016 Canonical Ltd
+# Copyright 2016 TransCirrus Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ import subprocess
 import time
 
 
-import designateclient.client as designate_client
-import designateclient.v1.domains as domains
-import designateclient.v1.records as records
-import designateclient.v1.servers as servers
+import troveclient.client as trove_client
+import troveclient.v1.domains as domains
+import troveclient.v1.records as records
+import troveclient.v1.servers as servers
 
 import charmhelpers.contrib.openstack.amulet.deployment as amulet_deployment
 import charmhelpers.contrib.openstack.amulet.utils as os_amulet_utils
@@ -31,7 +31,7 @@ import charmhelpers.contrib.openstack.amulet.utils as os_amulet_utils
 u = os_amulet_utils.OpenStackAmuletUtils(os_amulet_utils.DEBUG)
 
 
-class DesignateBasicDeployment(amulet_deployment.OpenStackAmuletDeployment):
+class TroveBasicDeployment(amulet_deployment.OpenStackAmuletDeployment):
     """Amulet tests on a basic designate deployment."""
 
     TEST_DOMAIN = 'amuletexample.com.'
