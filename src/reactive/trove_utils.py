@@ -79,7 +79,7 @@ def create_server(server_name):
     out, err = run_command(cmd)
     display(get_server_id(server_name))
 
-
+"""
 def create_domain(domain_name, domain_email):
     domain_id = get_domain_id(domain_name)
     if domain_id:
@@ -113,7 +113,7 @@ def get_domains():
                 'serial': values[2],
             }
     return domains
-
+"""
 
 def get_servers():
     servers = {}
