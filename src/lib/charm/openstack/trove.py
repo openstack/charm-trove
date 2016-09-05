@@ -34,48 +34,32 @@ TROVE_CONF = TROVE_DIR + '/trove.conf'
 # select the default release function to choose the right Charm class
 openstack_charm.use_defaults('charm.default-select-release')
 
+'''
+def render_sink_configs(interfaces_list):
+    """Use the singleton from the TroveCharm to render sink configs
 
-#def render_sink_configs(interfaces_list):
-#    """Use the singleton from the DesignateCharm to render sink configs
+    @param interfaces_list: List of instances of interface classes.
+    @returns: None
+    """
+    configs = [TROVE_DEFAULT]
+    TroveCharm.singleton.render_with_interfaces(
+        interfaces_list,
+        configs=configs)
+'''
 
-#    @param interfaces_list: List of instances of interface classes.
-#    @returns: None
-#    """
-#    configs = [NOVA_SINK_FILE, NEUTRON_SINK_FILE, DESIGNATE_DEFAULT]
-#    DesignateCharm.singleton.render_with_interfaces(
-#        interfaces_list,
-#        configs=configs)
-
-
-# Get database URIs for the two designate databases
+# Get database URIs for the two trove databases
 @openstack_adapters.adapter_property('shared-db')
 def trove_uri(db):
-    """URI for designate DB"""
+    """URI for trove DB"""
     return db.get_uri(prefix='trove')
 
-
-#@openstack_adapters.adapter_property('shared-db')
-#def designate_pool_uri(db):
-#    """URI for designate pool DB"""
-#    return db.get_uri(prefix='dpm')
-
-
-#@openstack_adapters.adapter_property('dns')
-#def slave_ips(dns):
-#    """List of DNS slave address infoprmation
-
-#    @returns: list [{'unit': unitname, 'address': 'address'},
-#                    ...]
-#    """
-#    return dns.relation.slave_ips()
-
-
+'''
 @openstack_adapters.adapter_property('dns')
 def pool_config(dns):
     """List of DNS slave information from Juju attached DNS slaves
 
     Creates a dict for each backends and returns a list of those dicts.
-    The designate config file has a section per backend. The template uses
+    The trove config file has a section per backend. The template uses
     the nameserver and pool_target names to create a section for each
     backend
 
@@ -130,7 +114,7 @@ def pool_config(config):
     """List of DNS slave information from user defined config
 
     Creates a dict for each backends and returns a list of those dicts.
-    The designate config file has a section per backend. The template uses
+    The trove config file has a section per backend. The template uses
     the nameserver and pool_target names to create a section for each
     backend.
 
@@ -152,7 +136,6 @@ def pool_config(config):
                 unit_name),
         })
     return pconfig
-
 
 @openstack_adapters.config_property
 def pool_targets(config):
@@ -230,7 +213,7 @@ def rndc_master_ip(config):
     """Returns IP address slave DNS slave should use to query master
     """
     return os_ip.resolve_address(endpoint_type=os_ip.INTERNAL)
-
+'''
 
 class TroveCharm(openstack_charm.HAOpenStackCharm):
 
@@ -329,7 +312,7 @@ class TroveCharm(openstack_charm.HAOpenStackCharm):
         @returns None
         """
         cls.ensure_api_responding()
-        create_cmd = ['reactive/designate_utils.py', 'domain-create',
+        create_cmd = ['reactive/trove_utils.py', 'domain-create',
                       '--domain-name', domain, '--email', email]
         subprocess.check_call(create_cmd)
     '''
@@ -342,7 +325,7 @@ class TroveCharm(openstack_charm.HAOpenStackCharm):
         @returns None
         """
         cls.ensure_api_responding()
-        create_cmd = ['reactive/designate_utils.py', 'server-create',
+        create_cmd = ['reactive/trove_utils.py', 'server-create',
                       '--server-name', nsname]
         subprocess.check_call(create_cmd)
 
@@ -363,7 +346,7 @@ class TroveCharm(openstack_charm.HAOpenStackCharm):
         until it succeeds or retry limit is exceeded"""
         hookenv.log('Checking API service is responding',
                     level=hookenv.WARNING)
-        check_cmd = ['reactive/designate_utils.py', 'server-list']
+        check_cmd = ['reactive/trove_utils.py', 'server-list']
         subprocess.check_call(check_cmd)
 
     @classmethod
@@ -417,7 +400,7 @@ class TroveCharm(openstack_charm.HAOpenStackCharm):
         # designate-manage communicates with designate via message bus so no
         # need to set OS_ vars
         if hookenv.is_leader():
-            cmd = ['designate-manage', 'pool', 'update']
+            cmd = ['trove-manage', 'pool', 'update']
             subprocess.check_call(cmd)
 
     def custom_assess_status_check(self):
