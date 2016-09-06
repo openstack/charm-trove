@@ -34,203 +34,24 @@ TROVE_CONF = TROVE_DIR + '/trove.conf'
 # select the default release function to choose the right Charm class
 openstack_charm.use_defaults('charm.default-select-release')
 
+'''
+def render_sink_configs(interfaces_list):
+    """Use the singleton from the TroveCharm to render sink configs
 
-#def render_sink_configs(interfaces_list):
-#    """Use the singleton from the DesignateCharm to render sink configs
+    @param interfaces_list: List of instances of interface classes.
+    @returns: None
+    """
+    configs = [TROVE_DEFAULT]
+    TroveCharm.singleton.render_with_interfaces(
+        interfaces_list,
+        configs=configs)
+'''
 
-#    @param interfaces_list: List of instances of interface classes.
-#    @returns: None
-#    """
-#    configs = [NOVA_SINK_FILE, NEUTRON_SINK_FILE, DESIGNATE_DEFAULT]
-#    DesignateCharm.singleton.render_with_interfaces(
-#        interfaces_list,
-#        configs=configs)
-
-
-# Get database URIs for the two designate databases
+# Get database URIs for the two trove databases
 @openstack_adapters.adapter_property('shared-db')
 def trove_uri(db):
-    """URI for designate DB"""
+    """URI for trove DB"""
     return db.get_uri(prefix='trove')
-
-
-#@openstack_adapters.adapter_property('shared-db')
-#def designate_pool_uri(db):
-#    """URI for designate pool DB"""
-#    return db.get_uri(prefix='dpm')
-
-
-#@openstack_adapters.adapter_property('dns')
-#def slave_ips(dns):
-#    """List of DNS slave address infoprmation
-
-#    @returns: list [{'unit': unitname, 'address': 'address'},
-#                    ...]
-#    """
-#    return dns.relation.slave_ips()
-
-
-@openstack_adapters.adapter_property('dns')
-def pool_config(dns):
-    """List of DNS slave information from Juju attached DNS slaves
-
-    Creates a dict for each backends and returns a list of those dicts.
-    The designate config file has a section per backend. The template uses
-    the nameserver and pool_target names to create a section for each
-    backend
-
-    @returns: list [{'nameserver': name, 'pool_target': name,
-                     'address': slave_ip_addr},
-                    ...]
-    """
-    pconfig = []
-    for slave in dns.slave_ips:
-        unit_name = slave['unit'].replace('/', '_').replace('-', '_')
-        pconfig.append({
-            'nameserver': 'nameserver_{}'.format(unit_name),
-            'pool_target': 'nameserver_{}'.format(unit_name),
-            'address': slave['address'],
-        })
-    return pconfig
-
-
-@openstack_adapters.adapter_property('dns')
-def pool_targets(dns):
-    """List of pool_target section names
-
-    @returns: str Comma delimited list of pool_target section names
-    """
-    return ', '.join([s['pool_target'] for s in dns.pool_config])
-
-
-@openstack_adapters.adapter_property('dns')
-def slave_addresses(dns):
-    """List of slave IP addresses
-
-    @returns: str Comma delimited list of slave IP addresses
-    """
-    return ', '.join(['{}:53'.format(s['address'])
-                     for s in dns.pool_config])
-
-
-@openstack_adapters.adapter_property('dns')
-def rndc_info(dns):
-    """Rndc key and algorith in formation.
-
-    @returns: dict {'algorithm': rndc_algorithm,
-                    'secret': rndc_secret_digest}
-    """
-    return dns.relation.rndc_info
-
-
-## configuration adapter custom properties
-
-@openstack_adapters.config_property
-def pool_config(config):
-    """List of DNS slave information from user defined config
-
-    Creates a dict for each backends and returns a list of those dicts.
-    The designate config file has a section per backend. The template uses
-    the nameserver and pool_target names to create a section for each
-    backend.
-
-    @returns: list [{'nameserver': name,
-                     'pool_target': name,
-                     'address': slave_ip_addr,
-                     'rndc_key_file': rndc_key_file},
-                    ...]
-    """
-    pconfig = []
-    for entry in config.dns_slaves.split():
-        address, port, key = entry.split(':')
-        unit_name = address.replace('.', '_')
-        pconfig.append({
-            'nameserver': 'nameserver_{}'.format(unit_name),
-            'pool_target': 'nameserver_{}'.format(unit_name),
-            'address': address,
-            'rndc_key_file': '/etc/designate/rndc_{}.key'.format(
-                unit_name),
-        })
-    return pconfig
-
-
-@openstack_adapters.config_property
-def pool_targets(config):
-    """List of pool_target section names
-
-    @returns: str Comma delimited list of pool_target section names
-    """
-    return ', '.join([s['pool_target'] for s in config.pool_config])
-
-
-@openstack_adapters.config_property
-def slave_addresses(config):
-    """List of slave IP addresses
-
-    @returns: str Comma delimited list of slave IP addresses
-    """
-    return ', '.join(['{}:53'.format(s['address'])
-                     for s in config.pool_config])
-
-
-@openstack_adapters.config_property
-def nova_domain_id(config):
-    """Returns the id of the domain corresponding to the user supplied
-    'nova-domain'
-
-    @returns nova domain id
-    """
-    domain = hookenv.config('nova-domain')
-    if domain:
-        return TroveCharm.get_domain_id(domain)
-    return None
-
-
-@openstack_adapters.config_property
-def neutron_domain_id(config):
-    """Returns the id of the domain corresponding to the user supplied
-    'neutron-domain'
-
-    @returns neutron domain id
-    """
-    domain = hookenv.config('neutron-domain')
-    if domain:
-        return TroveCharm.get_domain_id(domain)
-    return None
-
-
-@openstack_adapters.config_property
-def nova_conf_args(config):
-    """Returns config file directive to point daemons at nova config file.
-    These directives are designed to be used in /etc/default/ files
-
-    @returns startup config file option
-    """
-    daemon_arg = ''
-    if os.path.exists(NOVA_SINK_FILE):
-        daemon_arg = '--config-file={}'.format(NOVA_SINK_FILE)
-    return daemon_arg
-
-
-@openstack_adapters.config_property
-def neutron_conf_args(config):
-    """Returns config file directive to point daemons at neutron config
-    file. These directives are designed to be used in /etc/default/ files
-
-    @returns startup config file option
-    """
-    daemon_arg = ''
-    if os.path.exists(NEUTRON_SINK_FILE):
-        daemon_arg = '--config-file={}'.format(NEUTRON_SINK_FILE)
-    return daemon_arg
-
-
-@openstack_adapters.config_property
-def rndc_master_ip(config):
-    """Returns IP address slave DNS slave should use to query master
-    """
-    return os_ip.resolve_address(endpoint_type=os_ip.INTERNAL)
-
 
 class TroveCharm(openstack_charm.HAOpenStackCharm):
 
@@ -329,7 +150,7 @@ class TroveCharm(openstack_charm.HAOpenStackCharm):
         @returns None
         """
         cls.ensure_api_responding()
-        create_cmd = ['reactive/designate_utils.py', 'domain-create',
+        create_cmd = ['reactive/trove_utils.py', 'domain-create',
                       '--domain-name', domain, '--email', email]
         subprocess.check_call(create_cmd)
     '''
@@ -342,7 +163,7 @@ class TroveCharm(openstack_charm.HAOpenStackCharm):
         @returns None
         """
         cls.ensure_api_responding()
-        create_cmd = ['reactive/designate_utils.py', 'server-create',
+        create_cmd = ['reactive/trove_utils.py', 'server-create',
                       '--server-name', nsname]
         subprocess.check_call(create_cmd)
 
@@ -363,7 +184,7 @@ class TroveCharm(openstack_charm.HAOpenStackCharm):
         until it succeeds or retry limit is exceeded"""
         hookenv.log('Checking API service is responding',
                     level=hookenv.WARNING)
-        check_cmd = ['reactive/designate_utils.py', 'server-list']
+        check_cmd = ['reactive/trove_utils.py', 'server-list']
         subprocess.check_call(check_cmd)
 
     @classmethod
@@ -417,7 +238,7 @@ class TroveCharm(openstack_charm.HAOpenStackCharm):
         # designate-manage communicates with designate via message bus so no
         # need to set OS_ vars
         if hookenv.is_leader():
-            cmd = ['designate-manage', 'pool', 'update']
+            cmd = ['trove-manage', 'pool', 'update']
             subprocess.check_call(cmd)
 
     def custom_assess_status_check(self):

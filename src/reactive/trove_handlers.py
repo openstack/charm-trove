@@ -17,11 +17,10 @@ import charmhelpers.core.hookenv as hookenv
 import charms.reactive as reactive
 import charms_openstack.charm as openstack_charm
 
-import charm.openstack.designate as designate
+import charm.openstack.trove as trove
 
 
 COMPLETE_INTERFACE_STATES = [
-    'dns-backend.available',
     'shared-db.available',
     'identity-service.available',
     'amqp.available',
