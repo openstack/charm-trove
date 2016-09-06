@@ -7,7 +7,7 @@ description: |
  * Multi-tenant
  * Integrated with Keystone for authentication
  * Framework in place to integrate with Nova and Neutron notifications
- * Support for Percona and PostgreQL out of the box
+ * Support for Percona and PostgrSeQL out of the box
 tags:
   - openstack
   - database
