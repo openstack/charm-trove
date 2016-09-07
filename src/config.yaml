@@ -1,40 +1,49 @@
 options:
-  dns-slaves:
-    default:
+  openstack-origin:
+    default: distro
     type: string
     description: |
-      List of DNS slaves which will accept addzone/delzone rndc commands from
-      Designate. List is of the form slave_ip:rndc_port:rndc_key. This should
-      only be used if DNS servers are outside of Juju control. Using the
-      designate-bind charm is the prefered approach.
-  nova-domain:
-    default:
+      Repository from which to install.  May be one of the following:
+      distro (default), ppa:somecustom/ppa, a deb url sources entry,
+      or a supported Cloud Archive release pocket.
+      Supported Cloud Archive sources include:
+      cloud:<series>-<openstack-release>
+      cloud:<series>-<openstack-release>/updates
+      cloud:<series>-<openstack-release>/staging
+      cloud:<series>-<openstack-release>/proposed
+      For series=Xenial we support cloud archives for openstack-release:
+         * Mitaka
+      NOTE: updating this setting to a source that is known to provide
+      a later version of OpenStack will trigger a software upgrade.
+  rabbit-user:
+    default: barbican
     type: string
-    description: Domain to add records for new instances to
-  nova-domain-email:
-    default:
+    description: Username used to access rabbitmq queue
+  rabbit-vhost:
+    default: openstack
     type: string
-    description: Email address of the person responsible for the domain.
-  nameservers:
-    default:
+    description: Rabbitmq vhost
+  database-user:
+    default: barbican
     type: string
-    description: |
-      Space delimited list of nameservers. These are the nameservers that have
-      been provided to the domain registrar in order to delegate the domain to
-      Designate. e.g. "ns1.example.com ns2.example.com"
-  neutron-domain:
-    default:
+    description: Username for Neutron database access (if enabled)
+  database:
+    default: barbican
     type: string
-    description: Domain to add  floating ip records to
-  neutron-domain-email:
-    default:
+    description: Database name for Neutron (if enabled)
+  debug:
+    default: False
+    type: boolean
+    description: Enable debug logging
+  verbose:
+    default: False
+    type: boolean
+    description: Enable verbose logging
+  region:
+    default: RegionOne
     type: string
-    description: Email address of the person responsible for the domain.
-  neutron-record-format:
-    default: '%(octet0)s-%(octet1)s-%(octet2)s-%(octet3)s.%(zone)s'
+    description: OpenStack Region
+  keystone-api-version:
+    default: "3"
     type: string
-    description: Format of floating ip global records
-  nova-record-format:
-    default: '%(hostname)s.%(tenant_id)s.%(zone)s'
-    type: string
-    description: Format of floating ip global records
+    description: none,  2 or 3
