@@ -12,77 +12,78 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# this is just for the reactive handlers and calls into the charm.
+from __future__ import absolute_import
 
-import charmhelpers.core.hookenv as hookenv
 import charms.reactive as reactive
-import charms_openstack.charm as openstack_charm
+import charmhelpers.core.hookenv as hookenv
 
+# This charm's library contains all of the handler code associated with trove
 import charm.openstack.trove as trove
 
 
-COMPLETE_INTERFACE_STATES = [
-    'shared-db.available',
-    'identity-service.available',
-    'amqp.available',
-]
+# use a synthetic state to ensure that it get it to be installed independent of
+# the install hook.
+@reactive.when_not('charm.installed')
+def install_packages():
+    trove.install()
+    reactive.set_state('charm.installed')
 
 
-# wire in defaults for various interfaces and default states
-openstack_charm.use_defaults(
-    'charm.installed',
-    'amqp.connected',
-    'shared-db.connected',
-    'identity-service.connected',
-    'identity-service.available',  # Enables the SSL handler
-    'config.changed',
-    'update-status')
+@reactive.when('amqp.connected')
+def setup_amqp_req(amqp):
+    """Use the amqp interface to request access to the amqp broker using our
+    local configuration.
+    """
+    amqp.request_access(username=hookenv.config('rabbit-user'),
+                        vhost=hookenv.config('rabbit-vhost'))
+    trove.assess_status()
 
 
-@reactive.when_not('base-config.rendered')
-@reactive.when(*COMPLETE_INTERFACE_STATES)
-@openstack_charm.optional_interface('cluster.available')
-@openstack_charm.provide_charm_instance
-def configure_designate_basic(designate_charm, *args):
-    """Configure the minimum to boostrap designate"""
-    designate_charm.render_base_config(args)
-    reactive.set_state('base-config.rendered')
+@reactive.when('shared-db.connected')
+def setup_database(database):
+    """On receiving database credentials, configure the database on the
+    interface.
+    """
+    database.configure(hookenv.config('database'),
+                       hookenv.config('database-user'),
+                       hookenv.unit_private_ip())
+    trove.assess_status()
 
 
-@reactive.when_not('db.synched')
-@reactive.when('base-config.rendered')
-@reactive.when(*COMPLETE_INTERFACE_STATES)
-@openstack_charm.provide_charm_instance
-def run_db_migration(*args):
-    """Run database migrations"""
-    designate.db_sync()
-    if designate.db_sync_done():
-        reactive.set_state('db.synched')
+@reactive.when('identity-service.connected')
+def setup_endpoint(keystone):
+    trove.setup_endpoint(keystone)
+    trove.assess_status()
 
 
-@reactive.when('cluster.available')
-@openstack_charm.provide_charm_instance
-def update_peers(designate_charm, cluster):
-    """Inform designate peers about this unit"""
-    designate_charm.update_peers(cluster)
+@reactive.when('shared-db.available')
+@reactive.when('identity-service.available')
+@reactive.when('amqp.available')
+def render_stuff(*args):
+    """Render the configuration for Barbican when all the interfaces are
+    available.
+
+    Note that the HSM interface is optional (hence the @when_any) and thus is
+    only used if it is available.
+    """
+    # Get the optional hsm relation, if it is available for rendering.
+    hsm = reactive.RelationBase.from_state('hsm.available')
+    if hsm is not None:
+        args = args + (hsm, )
+    trove.render_configs(args)
+    trove.assess_status()
 
 
-@reactive.when('db.synched')
-@reactive.when(*COMPLETE_INTERFACE_STATES)
-@openstack_charm.optional_interface('cluster.available')
-@openstack_charm.provide_charm_instance
-def configure_designate_full(designate_charm, *args):
-    """Write out all designate config include bootstrap domain info"""
-    designate_charm.configure_ssl()
-    designate_charm.render_full_config(args)
-    designate_charm.create_initial_servers_and_domains()
-    designate.render_sink_configs(args)  # Not on the charm class!
-    designate_charm.render_rndc_keys()
-    designate_charm.update_pools()
+@reactive.when('config.changed')
+def config_changed():
+    """When the configuration changes, assess the unit's status to update any
+    juju state required"""
+    trove.assess_status()
 
 
-@reactive.when('ha.connected')
-@openstack_charm.provide_charm_instance
-def cluster_connected(designate_charm, hacluster):
-    """Configure HA resources in corosync"""
-    designate_charm.configure_ha_resources(hacluster)
-    designate_charm.assess_status()
+@reactive.when('identity-service.available')
+def configure_ssl(keystone):
+    """Configure SSL access to Barbican if requested"""
+    trove.configure_ssl(keystone)
+
