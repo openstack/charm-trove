@@ -50,6 +50,11 @@ def setup_database(database):
                        hookenv.unit_private_ip())
     trove.assess_status()
 
+#This is for the HA cluster DB for the HA requeroment. I think we need to use this and not shared-db
+#@reactive.when('cluster.available')
+
+#this is to check if ha is running
+#@reactive.when('ha.connected')
 
 @reactive.when('identity-service.connected')
 def setup_endpoint(keystone):
@@ -68,9 +73,6 @@ def render_stuff(*args):
     only used if it is available.
     """
     # Get the optional hsm relation, if it is available for rendering.
-    hsm = reactive.RelationBase.from_state('hsm.available')
-    if hsm is not None:
-        args = args + (hsm, )
     trove.render_configs(args)
     trove.assess_status()
 
@@ -87,3 +89,13 @@ def configure_ssl(keystone):
     """Configure SSL access to Barbican if requested"""
     trove.configure_ssl(keystone)
 
+
+#when cloud-compute.available
+
+#when image-service.available
+
+#when cinder - I need to find out what juju calls this
+
+#when heat - I need to find out what juju calls this
+
+#when ceph.available
