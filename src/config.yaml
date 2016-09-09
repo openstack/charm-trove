@@ -16,7 +16,7 @@ options:
       NOTE: updating this setting to a source that is known to provide
       a later version of OpenStack will trigger a software upgrade.
   rabbit-user:
-    default: barbican
+    default: trove
     type: string
     description: Username used to access rabbitmq queue
   rabbit-vhost:
@@ -24,11 +24,11 @@ options:
     type: string
     description: Rabbitmq vhost
   database-user:
-    default: barbican
+    default: trove
     type: string
     description: Username for Neutron database access (if enabled)
   database:
-    default: barbican
+    default: trove
     type: string
     description: Database name for Neutron (if enabled)
   debug:
