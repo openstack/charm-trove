@@ -146,7 +146,7 @@ class TroveCharm(charms_openstack.charm.HAOpenStackCharm):
     functionality to manage a trove unit.
     """
 
-    release = 'mitaka'
+    release = 'icehouse'
     name = 'trove'
     packages = PACKAGES
     api_ports = {
