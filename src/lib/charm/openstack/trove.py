@@ -47,7 +47,7 @@ def install():
     """Use the singleton from the TroveCharm to install the packages on the
     unit
     """
-    unitdata.kv().unset(OPENSTACK_RELEASE_KEY)
+    #unitdata.kv().unset(OPENSTACK_RELEASE_KEY)
     TroveCharm.singleton.install()
 
 
