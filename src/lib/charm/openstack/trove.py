@@ -127,13 +127,6 @@ class TroveConfigurationAdapter(
 
 
 class TroveAdapters(charms_openstack.adapters.OpenStackAPIRelationAdapters):
-    """
-    Adapters class for the Trove charm.
-
-    This plumbs in the TroveConfigurationAdapter as the ConfigurationAdapter
-    to provide additional properties.
-    """
-
     def __init__(self, relations):
         super(TroveAdapters, self).__init__(
             relations,
@@ -142,10 +135,6 @@ class TroveAdapters(charms_openstack.adapters.OpenStackAPIRelationAdapters):
 
 
 class TroveCharm(charms_openstack.charm.HAOpenStackCharm):
-    """TroveCharm provides the specialisation of the OpenStackCharm
-    functionality to manage a trove unit.
-    """
-
     release = 'icehouse'
     name = 'trove'
     packages = PACKAGES
