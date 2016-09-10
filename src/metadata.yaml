@@ -12,7 +12,8 @@ tags:
   - openstack
   - database
 series:
- - xenial
+  - xenial
+  - trusty
 subordinate: false
 provides:
   dbaas:
