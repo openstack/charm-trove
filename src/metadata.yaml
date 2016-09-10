@@ -13,7 +13,6 @@ tags:
   - database
 series:
   - xenial
-  - trusty
 subordinate: false
 provides:
   dbaas:
