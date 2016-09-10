@@ -151,7 +151,7 @@ class TroveCharm(charms_openstack.charm.HAOpenStackCharm):
 
     # Note that the hsm interface is optional - defined in config.yaml
     #required_relations = ['shared-db', 'amqp', 'identity-service', 'image-service', 'cloud-compute', 'cluster',cinder heat swift]
-    required_relations = ['shared-db', 'amqp', 'identity-service', 'image-service', 'cloud-compute', 'cinder-volume-service', '']
+    required_relations = ['shared-db', 'amqp', 'identity-service', 'image-service', 'cloud-compute', 'cinder-volume-service']
 
     restart_map = {
         TROVE_CONF: services,
