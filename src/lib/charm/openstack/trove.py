@@ -135,7 +135,7 @@ class TroveAdapters(charms_openstack.adapters.OpenStackAPIRelationAdapters):
 
 
 class TroveCharm(charms_openstack.charm.HAOpenStackCharm):
-    release = 'icehouse'
+    release = 'mitaka'
     name = 'trove'
     packages = PACKAGES
     api_ports = {
