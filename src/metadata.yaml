@@ -21,6 +21,12 @@ requires:
   ha:
     interface: hacluster
     scope: container
+  amqp:
+    interface: rabbitmq
+  identity-service:
+    interface: keystone
+  cloud-compute:
+    interface: nova-cloud-controller
 peers:
   cluster:
     interface: openstack-ha
