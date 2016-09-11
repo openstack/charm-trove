@@ -160,7 +160,7 @@ class TroveCharm(charms_openstack.charm.HAOpenStackCharm):
     default_service = 'trove-api'
 
     api_ports = {
-        'trove-worker': {
+        'trove-api': {
             os_ip.PUBLIC: 8779,
             os_ip.ADMIN: 8779,
             os_ip.INTERNAL: 8779,
