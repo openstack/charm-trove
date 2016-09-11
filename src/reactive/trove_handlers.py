@@ -66,6 +66,7 @@ def setup_endpoint(keystone):
 #def render_stuff(*args):
     # Get the optional hsm relation, if it is available for rendering.
 #    trove.render_configs(args)
+#    reactive.set_state('config.complete')
 #    trove.assess_status()
 
 MINIMAL_INTERFACES = [
