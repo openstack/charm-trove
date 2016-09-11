@@ -28,8 +28,6 @@ import charms_openstack.charm
 import charms_openstack.adapters
 import charms_openstack.ip as os_ip
 
-PACKAGES = ['python-trove', 'python-troveclient', 'trove-common', 'trove-api', 'trove-taskmanager','trove-conductor']
-
 TROVE_DIR = '/etc/trove/'
 TROVE_CONF = TROVE_DIR + "trove.conf"
 TROVE_API_PASTE_CONF = TROVE_DIR + "api-paste.ini"
@@ -137,7 +135,7 @@ class TroveAdapters(charms_openstack.adapters.OpenStackAPIRelationAdapters):
 class TroveCharm(charms_openstack.charm.HAOpenStackCharm):
     release = 'mitaka'
     name = 'trove'
-    packages = PACKAGES
+    packages = ['python-trove', 'python-troveclient', 'trove-common', 'trove-api', 'trove-taskmanager','trove-conductor']
     api_ports = {
         'trove-worker': {
             os_ip.PUBLIC: 8779,
