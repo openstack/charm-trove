@@ -36,8 +36,10 @@ def setup_amqp_req(amqp):
     Use the amqp interface to request access to the amqp broker using our
     local configuration.
     """
-    amqp.request_access(username=hookenv.config('rabbit-user'),
-                        vhost=hookenv.config('rabbit-vhost'))
+    #amqp.request_access(username=hookenv.config('trove'),
+    #                    vhost=hookenv.config('openstack'))
+    amqp.request_access(username='trove',
+                        vhost='openstack')
     trove.assess_status()
 
 
@@ -46,9 +48,10 @@ def setup_database(database):
     """
     Configure the database on the interface.
     """
-    database.configure(hookenv.config('database'),
-                       hookenv.config('database-user'),
-                       hookenv.unit_private_ip())
+    #database.configure(hookenv.config('trove'),
+    #                   hookenv.config('trove'),
+    #                   hookenv.unit_private_ip())
+    database.configure('trove', 'trove', hookenv.unit_private_ip())
     trove.assess_status()
 
 #this is to check if ha is running
@@ -60,15 +63,24 @@ def setup_endpoint(keystone):
     trove.assess_status()
 
 
-#@reactive.when('shared-db.available')
-#@reactive.when('identity-service.available')
-#@reactive.when('amqp.available')
-#def render_stuff(*args):
+@reactive.when('shared-db.available')
+@reactive.when('identity-service.available')
+@reactive.when('amqp.available')
+def render_stuff(*args):
     # Get the optional hsm relation, if it is available for rendering.
-#    trove.render_configs(args)
-#    reactive.set_state('config.complete')
-#    trove.assess_status()
+    trove.render_configs(args)
+    reactive.set_state('config.complete')
+    trove.assess_status()
 
+@reactive.when('config.complete')
+@reactive.when_not('db.synced')
+def run_db_migration():
+    trove.db_sync()
+    trove.restart_all()
+    reactive.set_state('db.synced')
+    trove.assess_status()
+
+"""
 MINIMAL_INTERFACES = [
     'shared-db.available',
     'identity-service.available',
@@ -94,7 +106,7 @@ def render_unclustered(*args):
                *MINIMAL_INTERFACES)
 def render_clustered(*args):
     render(*args)
-
+"""
 
 @reactive.when('config.changed')
 def config_changed():

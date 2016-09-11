@@ -1,13 +1,10 @@
 name: trove
-summary: trove provides DBaaS services for OpenStack
+summary: Trove provides DBaaS services for OpenStack
 maintainer: TransCirrus <support@transcirrus.com>
 description: |
- Designate provides DBaaS services for OpenStack:
- * REST API for domain/record management
- * Multi-tenant
- * Integrated with Keystone for authentication
- * Framework in place to integrate with Nova and Neutron notifications
- * Support for Percona and PostgrSeQL out of the box
+ Trove is Database as a Service for OpenStack. It's designed to run entirely on OpenStack,
+ with the goal of allowing users to quickly and easily utilize the features of a relational
+ or non-relational database without the burden of handling complex administrative tasks.
 tags:
   - openstack
   - database

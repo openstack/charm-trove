@@ -41,13 +41,24 @@ OPENSTACK_RELEASE_KEY = 'trove-charm.openstack-release-version'
 ###
 # Handler functions for events that are interesting to the Trove charms
 
+#Copied from the Congress example charm
+#https://github.com/openstack/charm-guide/blob/master/doc/source/new-charm.rst
 def install():
     """Use the singleton from the TroveCharm to install the packages on the
     unit
     """
-    #unitdata.kv().unset(OPENSTACK_RELEASE_KEY)
     TroveCharm.singleton.install()
 
+def restart_all():
+    """Use the singleton from the TroveCharm to restart services on the
+    unit
+    """
+    TroveCharm.singleton.restart_all()
+
+def db_sync():
+    """Use the singleton from the TroveCharm to run db migration
+    """
+    TroveCharm.singleton.db_sync()
 
 def setup_endpoint(keystone):
     """When the keystone interface connects, register this unit in the keystone
@@ -133,9 +144,21 @@ class TroveAdapters(charms_openstack.adapters.OpenStackAPIRelationAdapters):
 
 
 class TroveCharm(charms_openstack.charm.HAOpenStackCharm):
-    release = 'mitaka'
+    service_name = 'trove'
+
     name = 'trove'
+
+    release = 'mitaka'
+
     packages = ['python-trove', 'python-troveclient', 'trove-common', 'trove-api', 'trove-taskmanager','trove-conductor']
+
+    services = ['trove-api', 'trove-taskmanager', 'trove-conductor']
+
+    #adapters_class = TroveAdapters
+    adapters_class = charms_openstack.adapters.OpenStackRelationAdapters
+
+    default_service = 'trove-api'
+
     api_ports = {
         'trove-worker': {
             os_ip.PUBLIC: 8779,
@@ -143,9 +166,11 @@ class TroveCharm(charms_openstack.charm.HAOpenStackCharm):
             os_ip.INTERNAL: 8779,
         }
     }
+
+    sync_cmd = ['trove-manage', 'db_sync']
+
     service_type = 'trove'
-    default_service = 'trove-worker'
-    services = ['trove-api', 'trove-taskmanager', 'trove-conductor']
+
 
     # Note that the hsm interface is optional - defined in config.yaml
     #required_relations = ['shared-db', 'amqp', 'identity-service', 'image-service', 'cloud-compute', 'cluster',cinder heat swift]
@@ -158,8 +183,17 @@ class TroveCharm(charms_openstack.charm.HAOpenStackCharm):
         TROVE_TASK_MANAGER: services
     }
 
-    adapters_class = TroveAdapters
+    
     ha_resources = ['vips', 'haproxy']
+
+    def __init__(self, release=None, **kwargs):
+        """
+        Copied out of the github congress example. Checks to make sure a release
+        is give, if not it pull the one out of keystone.
+        """
+        if release is None:
+            release = ch_utils.os_release('python-keystonemiddleware')
+        super(TroveCharm, self).__init__(release=release, **kwargs)
 
     def install(self):
         """Customise the installation, configure the source and then call the
