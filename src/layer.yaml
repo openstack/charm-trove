@@ -1,4 +1,4 @@
-includes: ['layer:openstack-api', 'interface:hacluster', 'interface:openstack-ha', 'interface:mysql-shared', 'interface:rabbitmq', 'interface:keystone', 'interface:cloud-compute']
+includes: ['layer:openstack-api', 'interface:hacluster', 'interface:openstack-ha', 'interface:mysql-shared', 'interface:rabbitmq', 'interface:keystone']
 options:
   basic:
     use_venv: True
