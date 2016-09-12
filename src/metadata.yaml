@@ -11,9 +11,6 @@ tags:
 series:
   - xenial
 subordinate: false
-provides:
-  dbaas:
-    interface: trove
 requires:
   ha:
     interface: hacluster
