@@ -96,6 +96,18 @@ def configure_ssl(keystone=None):
     """
     TroveCharm.singleton.configure_ssl(keystone)
 
+def configure_cloud_compute():
+    #TODO
+    pass
+
+def configure_cinder():
+    #TODO
+    pass
+
+def configure_image_service():
+    #TODO
+    pass
+
 
 ###
 # Implementation of the Trove Charm classes

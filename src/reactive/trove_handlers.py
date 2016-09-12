@@ -119,10 +119,22 @@ def configure_ssl(keystone):
 
 
 #when cloud-compute.available
+@reactive.when('cloud-compute.available')
+def configure_cloud_compute():
+    trove.configure_cloud_compute()
+    trove.assess_status()
 
 #when image-service.available
+@reactive.when('image-service.available')
+def configure_image_service():
+    trove.configure_image_service()
+    trove.assess_status()
 
 #when cinder-volume-service
+@reactive.when('cinder-volume-service.available')
+def configure_cinder():
+    trove.configure_cinder()
+    trove.assess_status()
 
 #when heat - I need to find out what juju calls this
 
