@@ -181,7 +181,7 @@ class TroveCharm(charms_openstack.charm.HAOpenStackCharm):
 
     sync_cmd = ['trove-manage', 'db_sync']
 
-    service_type = 'database'
+    service_type = 'trove'
 
 
     # Note that the hsm interface is optional - defined in config.yaml
