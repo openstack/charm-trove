@@ -38,8 +38,8 @@ def setup_amqp_req(amqp):
     """
     #amqp.request_access(username=hookenv.config('trove'),
     #                    vhost=hookenv.config('openstack'))
-    amqp.request_access(username='trove',
-                        vhost='openstack')
+    amqp.request_access(username='rabbit-user',
+                        vhost='rabbit-vhost')
     trove.assess_status()
 
 
@@ -48,10 +48,10 @@ def setup_database(database):
     """
     Configure the database on the interface.
     """
-    #database.configure(hookenv.config('trove'),
-    #                   hookenv.config('trove'),
-    #                   hookenv.unit_private_ip())
-    database.configure('trove', 'trove', hookenv.unit_private_ip())
+    database.configure(hookenv.config('database'),
+                       hookenv.config('database-user'),
+                       hookenv.unit_private_ip())
+    #database.configure('trove', 'trove', hookenv.unit_private_ip())
     trove.assess_status()
 
 #this is to check if ha is running
