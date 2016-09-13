@@ -36,10 +36,8 @@ def setup_amqp_req(amqp):
     Use the amqp interface to request access to the amqp broker using our
     local configuration.
     """
-    #amqp.request_access(username=hookenv.config('trove'),
-    #                    vhost=hookenv.config('openstack'))
-    amqp.request_access(username='rabbit-user',
-                        vhost='rabbit-vhost')
+    amqp.request_access(username=hookenv.config('rabbit-user'),
+                        vhost=hookenv.config('rabbit-vhost'))
     trove.assess_status()
 
 
