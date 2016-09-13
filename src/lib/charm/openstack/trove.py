@@ -166,8 +166,7 @@ class TroveCharm(charms_openstack.charm.HAOpenStackCharm):
 
     services = ['trove-api', 'trove-taskmanager', 'trove-conductor']
 
-    #adapters_class = TroveAdapters
-    adapters_class = charms_openstack.adapters.OpenStackRelationAdapters
+    adapters_class = TroveAdapters
 
     default_service = 'trove-api'
 
