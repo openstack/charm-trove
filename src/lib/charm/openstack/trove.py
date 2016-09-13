@@ -124,29 +124,6 @@ class TroveConfigurationAdapter(
                 "Unsupported keystone-api-version ({}). It should be 2 or 3"
                 .format(self.keystone_api_version))
 
-    @property
-    def trove_api_keystone_pipeline(self):
-        if self.keystone_api_version == "2":
-            return 'cors keystone_authtoken context apiapp'
-        else:
-            return 'cors keystone_v3_authtoken context apiapp'
-
-    @property
-    def trove_api_pipeline(self):
-        return {
-            "2": "cors keystone_authtoken context apiapp",
-            "3": "cors keystone_v3_authtoken context apiapp",
-            "none": "cors unauthenticated-context apiapp"
-        }[self.keystone_api_version]
-
-    @property
-    def trove_api_keystone_audit_pipeline(self):
-        if self.keystone_api_version == "2":
-            return 'keystone_authtoken context audit apiapp'
-        else:
-            return 'keystone_v3_authtoken context audit apiapp'
-
-
 class TroveAdapters(charms_openstack.adapters.OpenStackAPIRelationAdapters):
     def __init__(self, relations):
         super(TroveAdapters, self).__init__(
@@ -166,7 +143,9 @@ class TroveCharm(charms_openstack.charm.HAOpenStackCharm):
 
     services = ['trove-api', 'trove-taskmanager', 'trove-conductor']
 
-    adapters_class = TroveAdapters
+    #not sure if this will work or not
+    adapters_class = charms_openstack.adapters.OpenStackRelationAdapters
+    #adapters_class = TroveAdapters
 
     default_service = 'trove-api'
 
