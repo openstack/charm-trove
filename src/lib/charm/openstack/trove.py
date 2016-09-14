@@ -60,6 +60,11 @@ def db_sync():
     """
     TroveCharm.singleton.db_sync()
 
+def configure_ha_resources(hacluster):
+    """Use the singleton from the TroveCharm to run configure_ha_resources
+    """
+    TroveCharm.singleton.configure_ha_resources(hacluster)
+
 def setup_endpoint(keystone):
     """When the keystone interface connects, register this unit in the keystone
     catalogue.

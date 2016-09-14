@@ -55,7 +55,9 @@ def setup_database(database):
     trove.assess_status()
 
 #this is to check if ha is running
-#@reactive.when('ha.connected')
+@reactive.when('ha.connected')
+def cluster_connected(hacluster):
+    trove.configure_ha_resources(hacluster)
 
 @reactive.when('identity-service.connected')
 def setup_endpoint(keystone):
