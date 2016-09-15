@@ -18,12 +18,6 @@ charms:
     juju add-relation trove rabbitmq-server
     juju add-relation trove keystone
 
-To add support for auto-generated records when guests are booted the charm 
-needs a relation with nova-compute:
-
-    juju deploy nova-cloud-controller
-    juju add-relation trove nova-compute
-
 # Bugs
 
 Please report bugs on [Launchpad](https://bugs.launchpad.net/charm-designate/+filebug).
