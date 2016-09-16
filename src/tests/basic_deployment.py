@@ -151,7 +151,7 @@ class TroveBasicDeployment(amulet_deployment.OpenStackAmuletDeployment):
                 return False
             time.sleep(2)
 
-    def test_100_services(self):
+    def test_services(self):
         """Verify the expected services are running on the corresponding
            service units."""
         u.log.debug('Checking system services on units...')
@@ -166,7 +166,7 @@ class TroveBasicDeployment(amulet_deployment.OpenStackAmuletDeployment):
 
         u.log.debug('OK')
 
-    def test_110_service_catalog(self):
+    def test_service_catalog(self):
         """Verify that the service catalog endpoint data is valid."""
         u.log.debug('Checking keystone service catalog data...')
         endpoint_check = {
@@ -187,7 +187,7 @@ class TroveBasicDeployment(amulet_deployment.OpenStackAmuletDeployment):
 
         u.log.debug('OK')
 
-    def test_114_trove_api_endpoint(self):
+    def test_trove_api_endpoint(self):
         """Verify the trove api endpoint data."""
         u.log.debug('Checking trove api endpoint data...')
         endpoints = self.keystone.endpoints.list()
@@ -208,7 +208,7 @@ class TroveBasicDeployment(amulet_deployment.OpenStackAmuletDeployment):
 
         u.log.debug('OK')
 
-    def test_200_trove_identity_relation(self):
+    def test_trove_identity_relation(self):
         """Verify the trove to keystone identity-service relation data"""
         u.log.debug('Checking trove to keystone identity-service '
                     'relation data...')
@@ -235,7 +235,7 @@ class TroveBasicDeployment(amulet_deployment.OpenStackAmuletDeployment):
 
         u.log.debug('OK')
 
-    def test_201_keystone_trove_identity_relation(self):
+    def test_keystone_trove_identity_relation(self):
         """Verify the keystone to trove identity-service relation data"""
         u.log.debug('Checking keystone:trove identity relation data...')
         unit = self.keystone_sentry
@@ -264,7 +264,7 @@ class TroveBasicDeployment(amulet_deployment.OpenStackAmuletDeployment):
 
         u.log.debug('OK')
 
-    def test_203_trove_amqp_relation(self):
+    def test_trove_amqp_relation(self):
         """Verify the trove to rabbitmq-server amqp relation data"""
         u.log.debug('Checking trove:rabbitmq amqp relation data...')
         unit = self.trove_sentry
@@ -282,7 +282,7 @@ class TroveBasicDeployment(amulet_deployment.OpenStackAmuletDeployment):
 
         u.log.debug('OK')
 
-    def test_204_amqp_trove_relation(self):
+    def test_amqp_trove_relation(self):
         """Verify the rabbitmq-server to trove amqp relation data"""
         u.log.debug('Checking rabbitmq:trove amqp relation data...')
         unit = self.rabbitmq_sentry
@@ -300,7 +300,7 @@ class TroveBasicDeployment(amulet_deployment.OpenStackAmuletDeployment):
 
         u.log.debug('OK')
 
-    def test_205_trove_trove_bind_relation(self):
+    def test_trove_trove_bind_relation(self):
         """Verify the trove to trove-bind dns-backend relation data"""
         u.log.debug('Checking trove:trove-bind dns-backend relation'
                     'data...')
@@ -315,7 +315,7 @@ class TroveBasicDeployment(amulet_deployment.OpenStackAmuletDeployment):
             message = u.relation_error('trove dns-backend', ret)
             amulet.raise_status(amulet.FAIL, msg=message)
 
-    def test_206_trove_bind_trove_relation(self):
+    def test_trove_bind_trove_relation(self):
         """Verify the trove_bind to trove dns-backend relation data"""
         u.log.debug('Checking trove-bind:trove dns-backend relation'
                     'data...')
@@ -332,7 +332,7 @@ class TroveBasicDeployment(amulet_deployment.OpenStackAmuletDeployment):
             message = u.relation_error('trove dns-backend', ret)
             amulet.raise_status(amulet.FAIL, msg=message)
 
-    def test_900_restart_on_config_change(self):
+    def test_restart_on_config_change(self):
         """Verify that the specified services are restarted when the config
            is changed.
            """
