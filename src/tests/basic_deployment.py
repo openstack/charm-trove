@@ -20,9 +20,6 @@ import time
 
 
 import troveclient.client as trove_client
-import troveclient.v1.domains as domains
-import troveclient.v1.records as records
-import troveclient.v1.servers as servers
 
 import charmhelpers.contrib.openstack.amulet.deployment as amulet_deployment
 import charmhelpers.contrib.openstack.amulet.utils as os_amulet_utils
@@ -334,41 +331,6 @@ class TroveBasicDeployment(amulet_deployment.OpenStackAmuletDeployment):
         if ret:
             message = u.relation_error('trove dns-backend', ret)
             amulet.raise_status(amulet.FAIL, msg=message)
-
-    def get_server_id(self, server_name):
-        server_id = None
-        for server in self.trove.servers.list():
-            if server.name == server_name:
-                server_id = server.id
-                break
-        return server_id
-
-    def get_test_server_id(self):
-        return self.get_server_id(self.TEST_NS2_RECORD)
-
-    def check_test_server_gone(self):
-        return not self.get_test_server_id()
-
-    def test_400_server_creation(self):
-        """Simple api calls to create domain"""
-        # Trove does not allow the last server to be delete so ensure ns1
-        # always present
-        if not self.get_server_id(self.TEST_NS1_RECORD):
-            server = servers.Server(name=self.TEST_NS1_RECORD)
-            new_server = self.trove.servers.create(server)
-
-        u.log.debug('Checking if server exists before trying to create it')
-        old_server_id = self.get_test_server_id()
-        if old_server_id:
-            u.log.debug('Deleting old server')
-            self.trove.servers.delete(old_server_id)
-        self.check_and_wait(
-            self.check_test_server_gone,
-            desc='Waiting for server to disappear')
-        u.log.debug('Creating new server')
-        server = servers.Server(name=self.TEST_NS2_RECORD)
-        new_server = self.trove.servers.create(server)
-        assert(new_server is not None)
 
     def test_900_restart_on_config_change(self):
         """Verify that the specified services are restarted when the config
