@@ -3,9 +3,9 @@ import unittest
 
 import reactive.designate_utils as dutils
 
-#DOMAIN_LIST = b"""
-#b78d458c-2a69-47e7-aa40-a1f9ff8809e3 frodo.com. 1467534540
-#fa5111a7-5659-45c6-a101-525b4259e8f0 bilbo.com. 1467534855
+DOMAIN_LIST = b"""
+b78d458c-2a69-47e7-aa40-a1f9ff8809e3 frodo.com. 1467534540
+fa5111a7-5659-45c6-a101-525b4259e8f0 bilbo.com. 1467534855
 """
 
 SERVER_LIST = b"""

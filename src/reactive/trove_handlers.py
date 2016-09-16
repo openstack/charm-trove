@@ -49,13 +49,14 @@ def setup_database(database):
     database.configure(hookenv.config('database'),
                        hookenv.config('database-user'),
                        hookenv.unit_private_ip())
-    #database.configure('trove', 'trove', hookenv.unit_private_ip())
     trove.assess_status()
 
-#this is to check if ha is running
+
+# this is to check if ha is running
 @reactive.when('ha.connected')
 def cluster_connected(hacluster):
     trove.configure_ha_resources(hacluster)
+
 
 @reactive.when('identity-service.connected')
 def setup_endpoint(keystone):
@@ -71,6 +72,7 @@ def render_stuff(*args):
     trove.render_configs(args)
     reactive.set_state('config.complete')
     trove.assess_status()
+
 
 @reactive.when('config.complete')
 @reactive.when_not('db.synced')
@@ -108,6 +110,7 @@ def render_clustered(*args):
     render(*args)
 """
 
+
 @reactive.when('config.changed')
 def config_changed():
     trove.assess_status()
@@ -118,24 +121,26 @@ def configure_ssl(keystone):
     trove.configure_ssl(keystone)
 
 
-#when cloud-compute.available
+# when cloud-compute.available
 @reactive.when('cloud-compute.available')
 def configure_cloud_compute():
     trove.configure_cloud_compute()
     trove.assess_status()
 
-#when image-service.available
+
+# when image-service.available
 @reactive.when('image-service.available')
 def configure_image_service():
     trove.configure_image_service()
     trove.assess_status()
 
-#when cinder-volume-service
+
+# when cinder-volume-service
 @reactive.when('cinder-volume-service.available')
 def configure_cinder():
     trove.configure_cinder()
     trove.assess_status()
 
-#when heat - I need to find out what juju calls this
+# when heat - I need to find out what juju calls this
 
-#when ceph.available
+# when ceph.available

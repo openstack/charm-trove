@@ -15,12 +15,12 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-import contextlib
+# import contextlib
 import unittest
 
 import mock
 
-import charm.openstack.designate as designate
+# import charm.openstack.designate as designate
 
 
 def FakeConfig(init_dict):

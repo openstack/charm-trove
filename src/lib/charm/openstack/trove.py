@@ -17,12 +17,12 @@
 # needed on the class.
 from __future__ import absolute_import
 
-import subprocess
+# import subprocess
 
 import charmhelpers.contrib.openstack.utils as ch_utils
-import charmhelpers.core.hookenv as hookenv
+# import charmhelpers.core.hookenv as hookenv
 import charmhelpers.core.unitdata as unitdata
-import charmhelpers.fetch
+# import charmhelpers.fetch
 
 import charms_openstack.charm
 import charms_openstack.adapters
@@ -41,13 +41,14 @@ OPENSTACK_RELEASE_KEY = 'trove-charm.openstack-release-version'
 ###
 # Handler functions for events that are interesting to the Trove charms
 
-#Copied from the Congress example charm
-#https://github.com/openstack/charm-guide/blob/master/doc/source/new-charm.rst
+# Copied from the Congress example charm
+# https://github.com/openstack/charm-guide/blob/master/doc/source/new-charm.rst
 def install():
     """Use the singleton from the TroveCharm to install the packages on the
     unit
     """
     TroveCharm.singleton.install()
+
 
 def restart_all():
     """Use the singleton from the TroveCharm to restart services on the
@@ -55,15 +56,18 @@ def restart_all():
     """
     TroveCharm.singleton.restart_all()
 
+
 def db_sync():
     """Use the singleton from the TroveCharm to run db migration
     """
     TroveCharm.singleton.db_sync()
 
+
 def configure_ha_resources(hacluster):
     """Use the singleton from the TroveCharm to run configure_ha_resources
     """
     TroveCharm.singleton.configure_ha_resources(hacluster)
+
 
 def setup_endpoint(keystone):
     """When the keystone interface connects, register this unit in the keystone
@@ -87,6 +91,7 @@ def render_configs(interfaces_list):
     """
     TroveCharm.singleton.render_with_interfaces(interfaces_list)
 
+
 def assess_status():
     """Just call the TroveCharm.singleton.assess_status() command to update
     status on the unit.
@@ -101,16 +106,19 @@ def configure_ssl(keystone=None):
     """
     TroveCharm.singleton.configure_ssl(keystone)
 
+
 def configure_cloud_compute():
-    #TODO
+    # TODO
     pass
+
 
 def configure_cinder():
-    #TODO
+    # TODO
     pass
 
+
 def configure_image_service():
-    #TODO
+    # TODO
     pass
 
 
@@ -129,6 +137,7 @@ class TroveConfigurationAdapter(
                 "Unsupported keystone-api-version ({}). It should be 2 or 3"
                 .format(self.keystone_api_version))
 
+
 class TroveAdapters(charms_openstack.adapters.OpenStackAPIRelationAdapters):
     def __init__(self, relations):
         super(TroveAdapters, self).__init__(
@@ -144,13 +153,13 @@ class TroveCharm(charms_openstack.charm.HAOpenStackCharm):
 
     release = 'mitaka'
 
-    packages = ['python-trove', 'python-troveclient', 'trove-common', 'trove-api', 'trove-taskmanager','trove-conductor']
+    packages = ['python-trove', 'python-troveclient', 'trove-common',
+                'trove-api', 'trove-taskmanager', 'trove-conductor']
 
     services = ['trove-api', 'trove-taskmanager', 'trove-conductor']
 
-    #not sure if this will work or not
+    # not sure if this will work or not
     adapters_class = charms_openstack.adapters.OpenStackAPIRelationAdapters
-    #adapters_class = TroveAdapters
 
     default_service = 'trove-api'
 
@@ -166,10 +175,13 @@ class TroveCharm(charms_openstack.charm.HAOpenStackCharm):
 
     service_type = 'trove'
 
-
     # Note that the hsm interface is optional - defined in config.yaml
-    #required_relations = ['shared-db', 'amqp', 'identity-service', 'image-service', 'cloud-compute', 'cluster',cinder heat swift]
-    #required_relations = ['shared-db', 'amqp', 'identity-service', 'image-service', 'cloud-compute', 'cinder-volume-service']
+    # required_relations = ['shared-db', 'amqp', 'identity-service',
+    #                       'image-service', 'cloud-compute', 'cluster',
+    #                       cinder heat swift]
+    # required_relations = ['shared-db', 'amqp', 'identity-service',
+    #                       'image-service', 'cloud-compute',
+    #                       'cinder-volume-service']
     required_relations = ['shared-db', 'amqp', 'identity-service']
 
     restart_map = {
@@ -179,13 +191,12 @@ class TroveCharm(charms_openstack.charm.HAOpenStackCharm):
         TROVE_TASK_MANAGER: services
     }
 
-    
     ha_resources = ['vips', 'haproxy']
 
     def __init__(self, release=None, **kwargs):
         """
-        Copied out of the github congress example. Checks to make sure a release
-        is give, if not it pull the one out of keystone.
+        Copied out of the github congress example. Checks to make sure a
+        release is give, if not it pull the one out of keystone.
         """
         if release is None:
             release = ch_utils.os_release('python-keystonemiddleware')
