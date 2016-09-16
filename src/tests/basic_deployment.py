@@ -101,13 +101,13 @@ class TroveBasicDeployment(amulet_deployment.OpenStackAmuletDeployment):
 
         # Authenticate admin with trove endpoint
         trove_ep = self.keystone.service_catalog.url_for(
-            service_type='trove',
+            service_type='database',
             endpoint_type='publicURL')
         keystone_ep = self.keystone.service_catalog.url_for(
             service_type='identity',
             endpoint_type='publicURL')
         self.trove = trove_client.Client(
-            version='1',
+            version='1.0',
             auth_url=keystone_ep,
             username="admin",
             password="openstack",
@@ -177,10 +177,9 @@ class TroveBasicDeployment(amulet_deployment.OpenStackAmuletDeployment):
             'internalURL': u.valid_url
         }
         expected = {
-            'dns': [endpoint_check],
+            'database': [endpoint_check],
         }
         actual = self.keystone.service_catalog.get_endpoints()
-
         ret = u.validate_svc_catalog_endpoint_data(expected, actual)
         if ret:
             amulet.raise_status(amulet.FAIL, msg=ret)
@@ -192,7 +191,7 @@ class TroveBasicDeployment(amulet_deployment.OpenStackAmuletDeployment):
         u.log.debug('Checking trove api endpoint data...')
         endpoints = self.keystone.endpoints.list()
         u.log.debug(endpoints)
-        admin_port = internal_port = public_port = '9001'
+        admin_port = internal_port = public_port = '8779'
         expected = {'id': u.not_null,
                     'region': 'RegionOne',
                     'adminurl': u.valid_url,
