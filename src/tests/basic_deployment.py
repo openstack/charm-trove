@@ -300,38 +300,6 @@ class TroveBasicDeployment(amulet_deployment.OpenStackAmuletDeployment):
 
         u.log.debug('OK')
 
-    def test_205_trove_trove_bind_relation(self):
-        """Verify the trove to trove-bind dns-backend relation data"""
-        u.log.debug('Checking trove:trove-bind dns-backend relation'
-                    'data...')
-        unit = self.trove_sentry
-        relation = ['dns-backend', 'trove-bind:dns-backend']
-        expected = {
-            'private-address': u.valid_ip,
-        }
-
-        ret = u.validate_relation_data(unit, relation, expected)
-        if ret:
-            message = u.relation_error('trove dns-backend', ret)
-            amulet.raise_status(amulet.FAIL, msg=message)
-
-    def test_206_trove_bind_trove_relation(self):
-        """Verify the trove_bind to trove dns-backend relation data"""
-        u.log.debug('Checking trove-bind:trove dns-backend relation'
-                    'data...')
-        unit = self.trove_bind_sentry
-        relation = ['dns-backend', 'trove:dns-backend']
-        expected = {
-            'private-address': u.valid_ip,
-            'rndckey': u.not_null,
-            'algorithm': 'hmac-md5',
-        }
-
-        ret = u.validate_relation_data(unit, relation, expected)
-        if ret:
-            message = u.relation_error('trove dns-backend', ret)
-            amulet.raise_status(amulet.FAIL, msg=message)
-
     def test_900_restart_on_config_change(self):
         """Verify that the specified services are restarted when the config
            is changed.
