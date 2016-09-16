@@ -101,13 +101,13 @@ class TroveBasicDeployment(amulet_deployment.OpenStackAmuletDeployment):
 
         # Authenticate admin with trove endpoint
         trove_ep = self.keystone.service_catalog.url_for(
-            service_type='trove',
+            service_type='database',
             endpoint_type='publicURL')
         keystone_ep = self.keystone.service_catalog.url_for(
             service_type='identity',
             endpoint_type='publicURL')
         self.trove = trove_client.Client(
-            version='1',
+            version='1.0',
             auth_url=keystone_ep,
             username="admin",
             password="openstack",
@@ -177,10 +177,9 @@ class TroveBasicDeployment(amulet_deployment.OpenStackAmuletDeployment):
             'internalURL': u.valid_url
         }
         expected = {
-            'dns': [endpoint_check],
+            'database': [endpoint_check],
         }
         actual = self.keystone.service_catalog.get_endpoints()
-
         ret = u.validate_svc_catalog_endpoint_data(expected, actual)
         if ret:
             amulet.raise_status(amulet.FAIL, msg=ret)
@@ -192,7 +191,7 @@ class TroveBasicDeployment(amulet_deployment.OpenStackAmuletDeployment):
         u.log.debug('Checking trove api endpoint data...')
         endpoints = self.keystone.endpoints.list()
         u.log.debug(endpoints)
-        admin_port = internal_port = public_port = '9001'
+        admin_port = internal_port = public_port = '8779'
         expected = {'id': u.not_null,
                     'region': 'RegionOne',
                     'adminurl': u.valid_url,
@@ -299,38 +298,6 @@ class TroveBasicDeployment(amulet_deployment.OpenStackAmuletDeployment):
             amulet.raise_status(amulet.FAIL, msg=message)
 
         u.log.debug('OK')
-
-    def test_trove_trove_bind_relation(self):
-        """Verify the trove to trove-bind dns-backend relation data"""
-        u.log.debug('Checking trove:trove-bind dns-backend relation'
-                    'data...')
-        unit = self.trove_sentry
-        relation = ['dns-backend', 'trove-bind:dns-backend']
-        expected = {
-            'private-address': u.valid_ip,
-        }
-
-        ret = u.validate_relation_data(unit, relation, expected)
-        if ret:
-            message = u.relation_error('trove dns-backend', ret)
-            amulet.raise_status(amulet.FAIL, msg=message)
-
-    def test_trove_bind_trove_relation(self):
-        """Verify the trove_bind to trove dns-backend relation data"""
-        u.log.debug('Checking trove-bind:trove dns-backend relation'
-                    'data...')
-        unit = self.trove_bind_sentry
-        relation = ['dns-backend', 'trove:dns-backend']
-        expected = {
-            'private-address': u.valid_ip,
-            'rndckey': u.not_null,
-            'algorithm': 'hmac-md5',
-        }
-
-        ret = u.validate_relation_data(unit, relation, expected)
-        if ret:
-            message = u.relation_error('trove dns-backend', ret)
-            amulet.raise_status(amulet.FAIL, msg=message)
 
     def test_restart_on_config_change(self):
         """Verify that the specified services are restarted when the config
