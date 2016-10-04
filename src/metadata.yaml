@@ -10,6 +10,7 @@ tags:
   - database
 series:
   - xenial
+  - yakkety
 subordinate: false
 requires:
   ha:
