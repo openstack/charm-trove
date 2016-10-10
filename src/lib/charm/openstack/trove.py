@@ -183,7 +183,7 @@ class TroveCharm(charms_openstack.charm.HAOpenStackCharm):
     # required_relations = ['shared-db', 'amqp', 'identity-service',
     #                       'image-service', 'cloud-compute',
     #                       'cinder-volume-service']
-    required_relations = ['shared-db', 'amqp', 'identity-service', 'cluster']
+    required_relations = ['shared-db', 'amqp', 'identity-service']
 
     restart_map = {
         TROVE_CONF: services,
