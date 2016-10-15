@@ -82,34 +82,6 @@ def run_db_migration():
     reactive.set_state('db.synced')
     trove.assess_status()
 
-"""
-MINIMAL_INTERFACES = [
-    'shared-db.available',
-    'identity-service.available',
-    'amqp.available',
-]
-
-def render(*args):
-    trove.render_configs(args)
-    reactive.set_state('config.complete')
-    trove.assess_status()
-
-
-@reactive.when('charm.installed')
-@reactive.when_not('cluster.available')
-@reactive.when(*MINIMAL_INTERFACES)
-def render_unclustered(*args):
-    trove.configure_ssl()
-    render(*args)
-
-
-@reactive.when('charm.installed')
-@reactive.when('cluster.available',
-               *MINIMAL_INTERFACES)
-def render_clustered(*args):
-    render(*args)
-"""
-
 
 @reactive.when('config.changed')
 def config_changed():
