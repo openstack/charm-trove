@@ -76,11 +76,14 @@ def setup_endpoint(keystone):
     :param keystone: instance of KeystoneRequires() class from i/f
     """
     charm = TroveCharm.singleton
+    public_ep = '{}/v1.0/%(tenant_id)s'.format(charm.public_url)
+    internal_ep = '{}/v1.0/%(tenant_id)s'.format(charm.internal_url)
+    admin_ep = '{}/v1.0/%(tenant_id)s'.format(charm.admin_url)
     keystone.register_endpoints(charm.service_type,
                                 charm.region,
-                                charm.public_url,
-                                charm.internal_url,
-                                charm.admin_url)
+                                public_ep,
+                                internal_ep,
+                                admin_ep)
 
 
 def render_configs(interfaces_list):
