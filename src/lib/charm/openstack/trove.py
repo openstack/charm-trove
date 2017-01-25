@@ -17,12 +17,10 @@
 # needed on the class.
 from __future__ import absolute_import
 
-# import subprocess
+import collections
 
 import charmhelpers.contrib.openstack.utils as ch_utils
-# import charmhelpers.core.hookenv as hookenv
 import charmhelpers.core.unitdata as unitdata
-# import charmhelpers.fetch
 
 import charms_openstack.charm
 import charms_openstack.adapters
@@ -48,6 +46,15 @@ def install():
     unit
     """
     TroveCharm.singleton.install()
+
+
+def db_sync_done():
+    """Use the singleton from the TroveCharm to check if db migration has
+    been run
+
+    @returns: str or None. Str if sync has been done otherwise None
+    """
+    return TroveCharm.singleton.db_sync_done()
 
 
 def restart_all():
@@ -110,23 +117,15 @@ def configure_ssl(keystone=None):
     TroveCharm.singleton.configure_ssl(keystone)
 
 
-def configure_cloud_compute():
-    # TODO
-    pass
+def update_peers(hacluster):
+    """Use the singleton from the TroveCharm to update peers with details
+    of this unit.
 
+    @param hacluster: OpenstackHAPeers() interface class
+    @returns: None
+    """
+    TroveCharm.singleton.update_peers(hacluster)
 
-def configure_cinder():
-    # TODO
-    pass
-
-
-def configure_image_service():
-    # TODO
-    pass
-
-
-###
-# Implementation of the Trove Charm classes
 
 class TroveConfigurationAdapter(
         charms_openstack.adapters.APIConfigurationAdapter):
@@ -150,9 +149,7 @@ class TroveAdapters(charms_openstack.adapters.OpenStackAPIRelationAdapters):
 
 
 class TroveCharm(charms_openstack.charm.HAOpenStackCharm):
-    service_name = 'trove'
-
-    name = 'trove'
+    service_name = name = 'trove'
 
     release = 'mitaka'
 
@@ -189,14 +186,14 @@ class TroveCharm(charms_openstack.charm.HAOpenStackCharm):
 
     ha_resources = ['vips', 'haproxy']
 
-    def __init__(self, release=None, **kwargs):
-        """
-        Copied out of the github congress example. Checks to make sure a
-        release is give, if not it pull the one out of keystone.
-        """
-        if release is None:
-            release = ch_utils.os_release('python-keystonemiddleware')
-        super(TroveCharm, self).__init__(release=release, **kwargs)
+    release_pkg = 'trove-common'
+    package_codenames = {
+        'aodh-common': collections.OrderedDict([
+            ('2', 'mitaka'),
+            ('3', 'newton'),
+            ('4', 'ocata'),
+        ]),
+    }
 
     def install(self):
         """Customise the installation, configure the source and then call the

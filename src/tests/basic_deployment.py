@@ -216,7 +216,7 @@ class TroveBasicDeployment(amulet_deployment.OpenStackAmuletDeployment):
         trove_ip = unit.relation(
             'identity-service',
             'keystone:identity-service')['private-address']
-        trove_endpoint = "http://%s:8779" % (trove_ip)
+        trove_endpoint = "http://{}:8779/v1.0/%(tenant_id)s".format(trove_ip)
 
         expected = {
             'admin_url': trove_endpoint,

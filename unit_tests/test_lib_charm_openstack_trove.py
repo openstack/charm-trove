@@ -15,42 +15,87 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-# import contextlib
-import unittest
-
 import mock
 
-# import charm.openstack.designate as designate
+import charm.openstack.trove as trove
+
+import charms_openstack.test_utils as test_utils
 
 
-def FakeConfig(init_dict):
-
-    def _config(key=None):
-        return init_dict[key] if key else init_dict
-
-    return _config
-
-
-class Helper(unittest.TestCase):
+class Helper(test_utils.PatchHelper):
 
     def setUp(self):
-        self._patches = {}
-        self._patches_start = {}
-        self.ch_config_patch = mock.patch('charmhelpers.core.hookenv.config')
-        self.ch_config = self.ch_config_patch.start()
-        self.ch_config.side_effect = lambda: {'ssl_param': None}
+        super().setUp()
+        self.patch_release(trove.TroveCharm.release)
 
-    def tearDown(self):
-        for k, v in self._patches.items():
-            v.stop()
-            setattr(self, k, None)
-        self._patches = None
-        self._patches_start = None
-        self.ch_config_patch.stop()
 
-    def patch(self, obj, attr, return_value=None, **kwargs):
-        mocked = mock.patch.object(obj, attr, **kwargs)
-        self._patches[attr] = mocked
-        started = mocked.start()
-        started.return_value = return_value
-        self._
+class TestOpenStackTrove(Helper):
+
+    def test_install(self):
+        self.patch_object(trove.TroveCharm.singleton, 'install')
+        trove.install()
+        self.install.assert_called_once_with()
+
+    def test_setup_endpoint(self):
+        self.patch_object(trove.TroveCharm, 'service_name',
+                          new_callable=mock.PropertyMock)
+        self.patch_object(trove.TroveCharm, 'region',
+                          new_callable=mock.PropertyMock)
+        self.patch_object(trove.TroveCharm, 'public_url',
+                          new_callable=mock.PropertyMock)
+        self.patch_object(trove.TroveCharm, 'internal_url',
+                          new_callable=mock.PropertyMock)
+        self.patch_object(trove.TroveCharm, 'admin_url',
+                          new_callable=mock.PropertyMock)
+        self.service_name.return_value = 'type1'
+        self.region.return_value = 'region1'
+        self.public_url.return_value = 'public_url'
+        self.internal_url.return_value = 'internal_url'
+        self.admin_url.return_value = 'admin_url'
+        keystone = mock.MagicMock()
+        trove.setup_endpoint(keystone)
+        keystone.register_endpoints.assert_called_once_with(
+            'trove', 'region1', 'public_url/v1.0/%(tenant_id)s',
+            'internal_url/v1.0/%(tenant_id)s',
+            'admin_url/v1.0/%(tenant_id)s')
+
+    def test_render_configs(self):
+        self.patch_object(trove.TroveCharm.singleton, 'render_with_interfaces')
+        trove.render_configs('interfaces-list')
+        self.render_with_interfaces.assert_called_once_with(
+            'interfaces-list')
+
+    def test_db_sync_done(self):
+        self.patch_object(trove.TroveCharm, 'db_sync_done')
+        trove.db_sync_done()
+        self.db_sync_done.assert_called_once_with()
+
+    def test_db_sync(self):
+        self.patch_object(trove.TroveCharm.singleton, 'db_sync')
+        trove.db_sync()
+        self.db_sync.assert_called_once_with()
+
+    def test_configure_ha_resources(self):
+        self.patch_object(trove.TroveCharm.singleton, 'db_sync')
+        trove.db_sync()
+        self.db_sync.assert_called_once_with()
+
+    def test_restart_all(self):
+        self.patch_object(trove.TroveCharm.singleton, 'restart_all')
+        trove.restart_all()
+        self.restart_all.assert_called_once_with()
+
+    def test_configure_ssl(self):
+        self.patch_object(trove.TroveCharm.singleton, 'configure_ssl')
+        trove.configure_ssl()
+        self.configure_ssl.assert_called_once_with(None)
+
+    def test_update_peers(self):
+        self.patch_object(trove.TroveCharm.singleton, 'update_peers')
+        trove.update_peers('cluster')
+        self.update_peers.assert_called_once_with('cluster')
+
+    def test_assess_status(self):
+        self.patch_object(trove.TroveCharm.singleton, 'assess_status')
+        trove.assess_status()
+        self.assess_status.assert_called_once_with()

@@ -36,8 +36,7 @@ def setup_amqp_req(amqp):
     Use the amqp interface to request access to the amqp broker using our
     local configuration.
     """
-    amqp.request_access(username=hookenv.config('rabbit-user'),
-                        vhost=hookenv.config('rabbit-vhost'))
+    amqp.request_access(username='trove', vhost='openstack')
     trove.assess_status()
 
 
@@ -83,6 +82,12 @@ def run_db_migration():
     trove.assess_status()
 
 
+@reactive.when('cluster.available')
+def update_peers(cluster):
+    """Inform designate peers about this unit"""
+    trove.update_peers(cluster)
+
+
 @reactive.when('config.changed')
 def config_changed():
     trove.assess_status()
@@ -91,28 +96,3 @@ def config_changed():
 @reactive.when('identity-service.available')
 def configure_ssl(keystone):
     trove.configure_ssl(keystone)
-
-
-# when cloud-compute.available
-@reactive.when('cloud-compute.available')
-def configure_cloud_compute():
-    trove.configure_cloud_compute()
-    trove.assess_status()
-
-
-# when image-service.available
-@reactive.when('image-service.available')
-def configure_image_service():
-    trove.configure_image_service()
-    trove.assess_status()
-
-
-# when cinder-volume-service
-@reactive.when('cinder-volume-service.available')
-def configure_cinder():
-    trove.configure_cinder()
-    trove.assess_status()
-
-# when heat - I need to find out what juju calls this
-
-# when ceph.available
