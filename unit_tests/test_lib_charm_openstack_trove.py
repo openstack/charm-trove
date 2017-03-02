@@ -17,6 +17,8 @@ from __future__ import print_function
 
 import mock
 
+import charmhelpers
+
 import charm.openstack.trove as trove
 
 import charms_openstack.test_utils as test_utils
@@ -30,6 +32,18 @@ class Helper(test_utils.PatchHelper):
 
 
 class TestOpenStackTrove(Helper):
+
+    def _patch_config_and_charm(self, config):
+        self.patch_object(charmhelpers.core.hookenv, 'config')
+
+        def cf(key=None):
+            if key is not None:
+                return config[key]
+            return config
+
+        self.config.side_effect = cf
+        c = trove.TroveCharm()
+        return c
 
     def test_install(self):
         self.patch_object(trove.TroveCharm.singleton, 'install')
@@ -99,3 +113,24 @@ class TestOpenStackTrove(Helper):
         self.patch_object(trove.TroveCharm.singleton, 'assess_status')
         trove.assess_status()
         self.assess_status.assert_called_once_with()
+
+    def test_get_amqp_credentials(self):
+        config = {
+            'rabbit-user': 'rabbit1',
+            'rabbit-vhost': 'password'
+        }
+        c = self._patch_config_and_charm(config)
+        self.assertEqual(c.get_amqp_credentials(), ('rabbit1', 'password'))
+
+    def test_get_database_setup(self):
+        self.patch_object(charmhelpers.core.hookenv,
+                          'network_get_primary_address')
+        self.network_get_primary_address.return_value = 'private_ip'
+        config = {
+            'database': 'db1',
+            'database-user': 'user1',
+        }
+        c = self._patch_config_and_charm(config)
+        self.assertEqual(
+            c.get_database_setup(),
+            [dict(database='db1', username='user1', hostname='private_ip')])

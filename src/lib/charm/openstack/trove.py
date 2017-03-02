@@ -21,6 +21,7 @@ import collections
 
 import charmhelpers.contrib.openstack.utils as ch_utils
 import charmhelpers.core.unitdata as unitdata
+import charmhelpers.core.hookenv as hookenv
 
 import charms_openstack.charm
 import charms_openstack.adapters
@@ -31,6 +32,7 @@ TROVE_CONF = TROVE_DIR + "trove.conf"
 TROVE_API_PASTE_CONF = TROVE_DIR + "api-paste.ini"
 TROVE_CONDUCTOR = TROVE_DIR + "trove-conductor.conf"
 TROVE_GUEST_AGENT = TROVE_DIR + "trove-guestagent.conf"
+TROVE_LOGGING_GUEST_AGENT = TROVE_DIR + "trove-logging-guestagent.conf"
 TROVE_TASK_MANAGER = TROVE_DIR + "trove-taskmanager.conf"
 
 OPENSTACK_RELEASE_KEY = 'trove-charm.openstack-release-version'
@@ -181,7 +183,8 @@ class TroveCharm(charms_openstack.charm.HAOpenStackCharm):
         TROVE_API_PASTE_CONF: services,
         TROVE_CONDUCTOR: services,
         TROVE_TASK_MANAGER: services,
-        TROVE_GUEST_AGENT: services
+        TROVE_GUEST_AGENT: services,
+        TROVE_LOGGING_GUEST_AGENT: services
     }
 
     ha_resources = ['vips', 'haproxy']
@@ -202,6 +205,39 @@ class TroveCharm(charms_openstack.charm.HAOpenStackCharm):
         self.configure_source()
         # and do the actual install
         super(TroveCharm, self).install()
+
+    def get_amqp_credentials(self):
+        """Provide the default amqp username and vhost as a tuple.
+
+        :returns (username, host): two strings to send to the amqp provider.
+        """
+        return (self.config['rabbit-user'], self.config['rabbit-vhost'])
+
+    def get_database_setup(self):
+        """Provide the default database credentials as a list of 3-tuples
+
+        returns a structure of:
+        [
+            {'database': <database>,
+             'username': <username>,
+             'hostname': <hostname of this unit>
+             'prefix': <the optional prefix for the database>, },
+        ]
+
+        :returns [{'database': ...}, ...]: credentials for multiple databases
+        """
+        host = None
+        try:
+            host = hookenv.network_get_primary_address('shared-db')
+        except NotImplementedError:
+            host = hookenv.unit_get('private-address')
+
+        return [
+            dict(
+                database=self.config['database'],
+                username=self.config['database-user'],
+                hostname=host, )
+        ]
 
 
 # Determine the charm class by the supported release

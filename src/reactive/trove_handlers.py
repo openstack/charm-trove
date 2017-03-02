@@ -16,39 +16,20 @@
 from __future__ import absolute_import
 
 import charms.reactive as reactive
-import charmhelpers.core.hookenv as hookenv
+import charms_openstack.charm as charm
 
 # This charm's library contains all of the handler code associated with trove
 import charm.openstack.trove as trove
 
-
-# use a synthetic state to ensure that it get it to be installed independent of
-# the install hook.
-@reactive.when_not('charm.installed')
-def install_packages():
-    trove.install()
-    reactive.set_state('charm.installed')
-
-
-@reactive.when('amqp.connected')
-def setup_amqp_req(amqp):
-    """
-    Use the amqp interface to request access to the amqp broker using our
-    local configuration.
-    """
-    amqp.request_access(username='trove', vhost='openstack')
-    trove.assess_status()
-
-
-@reactive.when('shared-db.connected')
-def setup_database(database):
-    """
-    Configure the database on the interface.
-    """
-    database.configure(hookenv.config('database'),
-                       hookenv.config('database-user'),
-                       hookenv.unit_private_ip())
-    trove.assess_status()
+charm.use_defaults(
+    'config.changed',
+    'amqp.connected',
+    'identity-service.available',
+    'charm.installed',
+    'upgrade-charm',
+    'update-status',
+    'shared-db.connected',
+)
 
 
 # this is to check if ha is running
@@ -86,13 +67,3 @@ def run_db_migration():
 def update_peers(cluster):
     """Inform designate peers about this unit"""
     trove.update_peers(cluster)
-
-
-@reactive.when('config.changed')
-def config_changed():
-    trove.assess_status()
-
-
-@reactive.when('identity-service.available')
-def configure_ssl(keystone):
-    trove.configure_ssl(keystone)
