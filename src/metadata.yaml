@@ -11,6 +11,7 @@ tags:
 series:
   - xenial
   - yakkety
+  - zesty
 subordinate: false
 requires:
   ha:

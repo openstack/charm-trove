@@ -191,10 +191,13 @@ class TroveCharm(charms_openstack.charm.HAOpenStackCharm):
 
     release_pkg = 'trove-common'
     package_codenames = {
-        'aodh-common': collections.OrderedDict([
+        'trove-common': collections.OrderedDict([
             ('2', 'mitaka'),
             ('3', 'newton'),
             ('4', 'ocata'),
+            ('5', 'pike'),
+            ('6', 'queens'),
+            ('7', 'rocky'),
         ]),
     }
 
