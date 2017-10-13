@@ -102,10 +102,10 @@ class TroveBasicDeployment(amulet_deployment.OpenStackAmuletDeployment):
         # Authenticate admin with trove endpoint
         trove_ep = self.keystone.service_catalog.url_for(
             service_type='database',
-            endpoint_type='publicURL')
+            interface='publicURL')
         keystone_ep = self.keystone.service_catalog.url_for(
             service_type='identity',
-            endpoint_type='publicURL')
+            interface='publicURL')
         self.trove = trove_client.Client(
             version='1.0',
             auth_url=keystone_ep,
