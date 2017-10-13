@@ -71,3 +71,9 @@ options:
     description: |
         List of IDs for management networks which should be attached to the
         instance regardless of what NICs are specified in the create API call.
+  use-nova-server-config-drive:
+    default: False
+    type: boolean
+    description: |
+        Nova config drive will be used with cloud-init to inject parameters and
+        files into the database instances.
