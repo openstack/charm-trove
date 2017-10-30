@@ -77,3 +77,18 @@ options:
     description: |
         Nova config drive will be used with cloud-init to inject parameters and
         files into the database instances.
+  trove-network-label-regex:
+    default: ".*"
+    type: string
+    description: Regular expression to match neutron network labels to determine
+        what IP addresses will be displayed by Trove.
+  trove-ip-regex:
+    default:
+    type: string
+    description: Regular expression to match individual IP addresses to determine
+        if it will be displayed by Trove.
+  trove-black-list-regex:
+    default:
+    type: string
+    description: Regular expression to match individual IP addresses to determine
+        if it should not be displayed by Trove.
