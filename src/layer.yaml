@@ -1,6 +1,0 @@
-includes: ['layer:openstack-api']
-options:
-  basic:
-    use_venv: True
-    include_system_packages: True
-repo: https://github.com/openstack/charm-trove.git
